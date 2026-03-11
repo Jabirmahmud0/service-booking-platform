@@ -1,0 +1,85 @@
+import { NextResponse } from 'next/server';
+import stripe from '@/lib/stripe';
+import connectDB from '@/lib/mongodb';
+import Booking from '@/models/Booking';
+
+export async function POST(request) {
+  try {
+    const body = await request.json();
+    const {
+      serviceId,
+      serviceName,
+      servicePrice,
+      scheduledAt,
+      customerName,
+      customerEmail,
+      customerPhone,
+    } = body;
+
+    // Validate required fields
+    if (!serviceId || !serviceName || !servicePrice || !scheduledAt || !customerName || !customerEmail || !customerPhone) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Create Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: serviceName,
+              description: `Appointment on ${new Date(scheduledAt).toLocaleDateString()}`,
+            },
+            unit_amount: servicePrice,
+          },
+          quantity: 1,
+        },
+      ],
+      customer_email: customerEmail,
+      success_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/cancel`,
+      metadata: {
+        serviceId,
+        serviceName,
+        scheduledAt,
+        customerName,
+        customerEmail,
+        customerPhone,
+      },
+    });
+
+    // Connect to database and create pending booking
+    try {
+      await connectDB();
+      
+      await Booking.create({
+        serviceId,
+        customerName,
+        customerEmail,
+        customerPhone,
+        scheduledAt: new Date(scheduledAt),
+        status: 'pending',
+        stripeSessionId: session.id,
+        amountPaid: servicePrice,
+        currency: 'usd',
+      });
+    } catch (dbError) {
+      console.error('Database error:', dbError);
+      // Continue even if DB fails - webhook will handle it
+    }
+
+    return NextResponse.json({ url: session.url });
+  } catch (error) {
+    console.error('Checkout error:', error);
+    return NextResponse.json(
+      { error: 'Failed to create checkout session' },
+      { status: 500 }
+    );
+  }
+}
