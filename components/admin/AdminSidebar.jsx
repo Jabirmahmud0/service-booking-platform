@@ -97,8 +97,8 @@ export default function AdminSidebar() {
           <div className="p-4 border-t border-white/10">
             <Link href="/" className="block mb-4">
               <Button
-                variant="outline"
-                className="w-full border-white/20 text-white hover:bg-white/10"
+                variant="secondary"
+                className="w-full bg-[#2563EB] text-white hover:bg-[#1E3A5F]"
               >
                 View Site
               </Button>
