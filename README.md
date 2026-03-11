@@ -21,16 +21,22 @@ BookEase is a production-grade service booking platform designed for modern busi
 - **Service Catalog CRUD**: Add, Edit, and Manage services with image support.
 - **Secure Authentication**: Credentials-based login using **Auth.js (NextAuth v5)**.
 
+### 📧 Email Notifications
+- **Booking Confirmation**: Beautiful HTML emails with booking details.
+- **Cancellation Notices**: Automated emails for cancelled bookings.
+- **Dev Mode Support**: Mock email logging for local development.
+
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS v4
+- **Frontend**: Next.js 16, React 19, Tailwind CSS v4, TypeScript
 - **Animation**: Framer Motion 11, Lucide Icons
 - **Backend**: Next.js API Routes, MongoDB Atlas, Mongoose
 - **Payments**: Stripe SDK + Webhooks
 - **Email**: Nodemailer + Gmail SMTP
-- **Auth**: Auth.js (v5)
+- **Auth**: Auth.js (NextAuth v5)
+- **Deployment**: Vercel
 
 ---
 
@@ -59,7 +65,22 @@ NEXT_PUBLIC_URL=http://localhost:3000
 AUTH_SECRET=your_auth_secret
 GMAIL_USER=your_email@gmail.com
 GMAIL_APP_PASSWORD=your_app_password
+EMAIL_DEV_MODE=true
 ```
+
+**Generate AUTH_SECRET:**
+```bash
+openssl rand -base64 32
+```
+
+**For Vercel Deployment**, add these environment variables in your Vercel project settings:
+- `MONGODB_URI` - Your MongoDB connection string
+- `STRIPE_SECRET_KEY` - Stripe secret key (sk_live_...)
+- `STRIPE_WEBHOOK_SECRET` - Stripe webhook signing secret
+- `NEXT_PUBLIC_URL` - Your production URL (e.g., https://your-app.vercel.app)
+- `AUTH_SECRET` - Same secret as local
+- `GMAIL_USER` - Your Gmail address
+- `GMAIL_APP_PASSWORD` - Gmail app-specific password
 
 ### 4. Run Development Server
 ```bash
@@ -80,8 +101,20 @@ npm run dev
 
 ## 🔗 Live Implementation
 
-- **Live Site**: [View on Vercel](https://service-booking-platform-one.vercel.app/)
+- **Live Site**: [View on Vercel](https://service-booking-platform-bay.vercel.app/)
 - **GitHub**: [Source Code](https://github.com/Jabirmahmud0/service-booking-platform)
+
+---
+
+## 📝 License
+
+MIT License - feel free to use this project for learning or commercial purposes.
+
+---
+
+## 👨‍💻 Author
+
+**Jabir Mahmud**
 
 ---
 
