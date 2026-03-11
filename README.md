@@ -66,6 +66,8 @@ AUTH_SECRET=your_auth_secret
 GMAIL_USER=your_email@gmail.com
 GMAIL_APP_PASSWORD=your_app_password
 EMAIL_DEV_MODE=true
+ADMIN_EMAIL=admin@bookease.app
+ADMIN_PASSWORD=admin123
 ```
 
 **Generate AUTH_SECRET:**
@@ -81,6 +83,12 @@ openssl rand -base64 32
 - `AUTH_SECRET` - Same secret as local
 - `GMAIL_USER` - Your Gmail address
 - `GMAIL_APP_PASSWORD` - Gmail app-specific password
+- `ADMIN_EMAIL` - Admin login email (default: admin@bookease.app)
+- `ADMIN_PASSWORD` - Admin login password (default: admin123)
+
+**Default Admin Credentials:**
+- Email: `admin@bookease.app`
+- Password: `admin123`
 
 ### 4. Run Development Server
 ```bash
