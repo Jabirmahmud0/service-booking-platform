@@ -43,6 +43,7 @@ const defaultService = {
   price: '',
   duration: '',
   category: '',
+  image: '',
 };
 
 export default function AdminServicesPage() {
@@ -89,6 +90,7 @@ export default function AdminServicesPage() {
       price: (service.price / 100).toString(),
       duration: service.duration.toString(),
       category: service.category || '',
+      image: service.image || '',
     });
     setErrors({});
     setIsModalOpen(true);
@@ -125,6 +127,7 @@ export default function AdminServicesPage() {
         price: Math.round(parseFloat(formData.price) * 100),
         duration: parseInt(formData.duration),
         category: formData.category || 'General',
+        image: formData.image || '',
       };
 
       const url = selectedService
@@ -205,9 +208,19 @@ export default function AdminServicesPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: index * 0.05 }}
-                    className="bg-white rounded-xl border border-[#E2E8F0] p-6 shadow-sm"
+                    className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm"
                   >
-                    <div className="flex items-start justify-between mb-4">
+                    {service.image && (
+                      <div className="aspect-video w-full overflow-hidden border-b border-[#E2E8F0]">
+                        <img 
+                          src={service.image} 
+                          alt={service.name}
+                          className="w-full h-full object-cover transition-transform hover:scale-105"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-4">
                       <Badge className="bg-[#DBEAFE] text-[#2563EB]">
                         {service.category || 'General'}
                       </Badge>
@@ -246,6 +259,7 @@ export default function AdminServicesPage() {
                         <span>{(service.price / 100).toFixed(2)}</span>
                       </div>
                     </div>
+                  </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -356,6 +370,17 @@ export default function AdminServicesPage() {
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 placeholder="e.g., Wellness, Consulting"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="image">Image URL</Label>
+              <Input
+                id="image"
+                value={formData.image}
+                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                placeholder="https://images.unsplash.com/..."
                 className="mt-1"
               />
             </div>

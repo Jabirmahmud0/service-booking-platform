@@ -21,35 +21,28 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import Navbar from '@/components/Navbar';
 
-// Demo service for fallback
-const demoService = {
-  _id: '1',
-  name: 'Deep Tissue Massage',
-  description: 'A therapeutic massage that focuses on realigning deeper layers of muscles.',
-  price: 12000,
-  duration: 60,
-  category: 'Wellness',
-};
-
-const timeSlots = [
-  '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-  '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM', '05:00 PM'
-];
-
 const slideVariants = {
   enter: (direction) => ({
-    x: direction > 0 ? 300 : -300,
+    x: direction > 0 ? 500 : -500,
     opacity: 0,
   }),
   center: {
+    zIndex: 1,
     x: 0,
     opacity: 1,
   },
   exit: (direction) => ({
-    x: direction < 0 ? 300 : -300,
+    zIndex: 0,
+    x: direction < 0 ? 500 : -500,
     opacity: 0,
   }),
 };
+
+const timeSlots = [
+  '09:00 AM', '10:00 AM', '11:00 AM',
+  '01:00 PM', '02:00 PM', '03:00 PM',
+  '04:00 PM', '05:00 PM'
+];
 
 export default function BookingPage({ params }) {
   const resolvedParams = use(params);
@@ -77,11 +70,12 @@ export default function BookingPage({ params }) {
           const data = await res.json();
           setService(data);
         } else {
-          setService({ ...demoService, _id: resolvedParams.serviceId });
+          console.error('Service not found');
+          setService(null);
         }
       } catch (error) {
-        console.log('Using demo service');
-        setService({ ...demoService, _id: resolvedParams.serviceId });
+        console.error('Error fetching service:', error);
+        setService(null);
       } finally {
         setLoading(false);
       }
@@ -205,33 +199,49 @@ export default function BookingPage({ params }) {
           </Button>
 
           {/* Service Info Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl border border-[#E2E8F0] p-6 mb-8"
-          >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <span className="inline-block px-3 py-1 text-xs font-medium bg-[#DBEAFE] text-[#2563EB] rounded-full mb-2">
-                  {service?.category || 'General'}
-                </span>
-                <h1 className="text-2xl font-bold text-[#1F2937]">{service?.name}</h1>
-                <p className="text-[#6B7280] mt-1">{service?.description}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <p className="text-sm text-[#6B7280]">Duration</p>
-                  <p className="text-lg font-semibold text-[#1E3A5F]">{service?.duration} min</p>
+          {!service ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl border border-red-100 p-8 mb-8 text-center"
+            >
+              <h1 className="text-2xl font-bold text-[#1F2937] mb-2">Service Not Found</h1>
+              <p className="text-[#6B7280] mb-6">The service you are looking for does not exist or has been removed.</p>
+              <Button onClick={() => router.push('/services')} className="bg-[#2563EB] hover:bg-[#1E3A5F]">
+                Browse Other Services
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl border border-[#E2E8F0] p-6 mb-8"
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className="inline-block px-3 py-1 text-xs font-medium bg-[#DBEAFE] text-[#2563EB] rounded-full mb-2">
+                    {service?.category || 'General'}
+                  </span>
+                  <h1 className="text-2xl font-bold text-[#1F2937]">{service?.name}</h1>
+                  <p className="text-[#6B7280] mt-1">{service?.description}</p>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm text-[#6B7280]">Price</p>
-                  <p className="text-2xl font-bold text-[#2563EB]">{formattedPrice}</p>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <p className="text-sm text-[#6B7280]">Duration</p>
+                    <p className="text-lg font-semibold text-[#1E3A5F]">{service?.duration} min</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-[#6B7280]">Price</p>
+                    <p className="text-2xl font-bold text-[#2563EB]">{formattedPrice}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          )}
 
-          {/* Progress Steps */}
+          {service && (
+            <>
+              {/* Progress Steps */}
           <div className="flex items-center justify-center mb-8">
             {[1, 2, 3].map((s) => (
               <div key={s} className="flex items-center">
@@ -518,6 +528,8 @@ export default function BookingPage({ params }) {
               </Button>
             )}
           </div>
+            </>
+          )}
         </div>
       </div>
     </div>

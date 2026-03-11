@@ -51,6 +51,12 @@ export default function Navbar() {
             >
               Services
             </Link>
+            <Link
+              href="/admin/dashboard"
+              className="text-sm font-medium text-[#1F2937] hover:text-[#2563EB] transition-colors"
+            >
+              Admin
+            </Link>
             <Link href="/services">
               <Button className="bg-[#2563EB] hover:bg-[#1E3A5F] text-white">
                 Book Now
@@ -92,6 +98,13 @@ export default function Navbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Services
+              </Link>
+              <Link
+                href="/admin/dashboard"
+                className="px-4 py-2 text-sm font-medium text-[#1F2937] hover:bg-[#F1F5F9] rounded-lg"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Admin
               </Link>
               <div className="px-4">
                 <Link href="/services" onClick={() => setIsMobileMenuOpen(false)}>

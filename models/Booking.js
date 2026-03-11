@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 
 function generateBookingRef() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let result = 'BK-';
-  for (let i = 0; i < 6; i++) {
+  let result = '';
+  for (let i = 0; i < 8; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;
@@ -18,7 +18,7 @@ const BookingSchema = new mongoose.Schema({
   serviceId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Service',
-    required: [true, 'Service is required'],
+    required: false,
   },
   customerName: {
     type: String,
@@ -77,4 +77,4 @@ BookingSchema.index({ scheduledAt: 1, serviceId: 1 });
 BookingSchema.index({ customerEmail: 1 });
 BookingSchema.index({ status: 1 });
 
-export default mongoose.models.Booking || mongoose.model('Booking', BookingSchema);
+export default mongoose.models?.Booking || mongoose.model('Booking', BookingSchema);

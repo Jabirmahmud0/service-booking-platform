@@ -33,49 +33,32 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const res = await fetch('/api/bookings?limit=5');
-        if (res.ok) {
-          const data = await res.json();
-          const bookings = data.bookings || [];
-          
-          // Calculate stats
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          
-          const todayBookings = bookings.filter(b => {
-            const bookingDate = new Date(b.scheduledAt);
-            bookingDate.setHours(0, 0, 0, 0);
-            return bookingDate.getTime() === today.getTime();
-          }).length;
+        setLoading(true);
+        // Fetch stats and recent bookings in parallel
+        const [statsRes, bookingsRes] = await Promise.all([
+          fetch('/api/stats'),
+          fetch('/api/bookings?limit=5')
+        ]);
 
-          const weekAgo = new Date();
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          
-          const weeklyRevenue = bookings
-            .filter(b => new Date(b.createdAt) >= weekAgo && ['confirmed', 'completed'].includes(b.status))
-            .reduce((sum, b) => sum + b.amountPaid, 0);
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          setStats(statsData);
+        }
 
-          const pendingBookings = bookings.filter(b => b.status === 'pending').length;
-
-          setStats({
-            todayBookings,
-            weeklyRevenue,
-            totalBookings: data.pagination?.total || bookings.length,
-            pendingBookings,
-          });
-
-          setRecentBookings(bookings.slice(0, 5));
+        if (bookingsRes.ok) {
+          const bookingsData = await bookingsRes.json();
+          setRecentBookings(bookingsData.bookings || []);
         }
       } catch (error) {
-        console.log('Error fetching dashboard data');
+        console.error('Error fetching dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchDashboardData();
   }, []);
 
   const kpiCards = [

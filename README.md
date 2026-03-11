@@ -1,35 +1,88 @@
-# service-booking-platform
+# 🚀 BookEase - Premium Service Booking Platform
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+![Version](https://img.shields.io/badge/version-1.0.0-blue) ![Status](https://img.shields.io/badge/status-Active%20Development-green) ![Delivery](https://img.shields.io/badge/delivery-Vercel-orange)
 
-## Built with v0
+BookEase is a production-grade service booking platform designed for modern businesses. It features a polished, mobile-first UI with smooth animations, secure Stripe payments, and a powerful real-time Admin Panel.
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+---
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_XKV8xFVL7hFmVniAOCvSLi24LGJK)
+## ✨ Key Features
 
-## Getting Started
+### 🛡️ Customer Experience
+- **Multi-step Booking Flow**: Smooth Date/Time selection and customer detail entry.
+- **Secure Payments**: Fully integrated with **Stripe Checkout Sessions**.
+- **Instant Confirmation**: Automated email notifications powered by **Nodemailer/Gmail**.
+- **Mobile-First Design**: Fully responsive across all devices (320px to 1440px+).
 
-First, run the development server:
+### 🛠️ Admin Panel
+- **Real-time Dashboard**: KPI cards for weekly revenue, today's bookings, and total volume.
+- **Booking Management**: View, Filter (by status), and Update (Confirm/Complete/Cancel) bookings.
+- **Soft-Delete**: Securely remove invalid bookings with a single click.
+- **Service Catalog CRUD**: Add, Edit, and Manage services with image support.
+- **Secure Authentication**: Credentials-based login using **Auth.js (NextAuth v5)**.
 
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS v4
+- **Animation**: Framer Motion 11, Lucide Icons
+- **Backend**: Next.js API Routes, MongoDB Atlas, Mongoose
+- **Payments**: Stripe SDK + Webhooks
+- **Email**: Nodemailer + Gmail SMTP
+- **Auth**: Auth.js (v5)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+- Node.js 18+
+- MongoDB Atlas Account
+- Stripe Account (for API keys)
+- Gmail App Password (for email delivery)
+
+### 2. Installation
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+git clone https://github.com/Jabirmahmud0/service-booking-platform.git
+cd service-booking-platform
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Environment Setup
+Create a `.env.local` file with the following variables:
+```env
+MONGODB_URI=your_mongodb_uri
+STRIPE_SECRET_KEY=your_stripe_secret
+STRIPE_WEBHOOK_SECRET=your_webhook_secret
+NEXT_PUBLIC_URL=http://localhost:3000
+AUTH_SECRET=your_auth_secret
+GMAIL_USER=your_email@gmail.com
+GMAIL_APP_PASSWORD=your_app_password
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Run Development Server
+```bash
+npm run dev
+```
 
-## Learn More
+---
 
-To learn more, take a look at the following resources:
+## 📂 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+- `app/ (public)`: Landing page, service catalog, and booking flow.
+- `app/ (admin)`: Protected admin dashboard and management tools.
+- `app/api/`: RESTful API endpoints for services, bookings, and payments.
+- `lib/`: Shared utility functions and database connection logic.
+- `models/`: Mongoose schemas for Bookings, Services, and Users.
 
-<a href="https://v0.app/chat/api/kiro/clone/Jabirmahmud0/service-booking-platform" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+---
+
+## 🔗 Live Implementation
+
+- **Live Site**: [View on Vercel](https://service-booking-platform-one.vercel.app/)
+- **GitHub**: [Source Code](https://github.com/Jabirmahmud0/service-booking-platform)
+
+---
+
+*Developed with efficiency and precision using AI-Assisted Modern Web Development.*

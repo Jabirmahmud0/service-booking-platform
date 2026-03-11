@@ -9,64 +9,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ServiceCard from '@/components/booking/ServiceCard';
 
-// Demo services data - in production this comes from MongoDB
-const demoServices = [
-  {
-    _id: '1',
-    name: 'Deep Tissue Massage',
-    description: 'A therapeutic massage that focuses on realigning deeper layers of muscles and connective tissue.',
-    price: 12000,
-    duration: 60,
-    category: 'Wellness',
-    active: true,
-  },
-  {
-    _id: '2',
-    name: 'Business Consultation',
-    description: 'One-on-one strategic consulting session for entrepreneurs and business owners.',
-    price: 15000,
-    duration: 45,
-    category: 'Consulting',
-    active: true,
-  },
-  {
-    _id: '3',
-    name: 'Personal Training Session',
-    description: 'Customized fitness training tailored to your goals with a certified trainer.',
-    price: 8000,
-    duration: 60,
-    category: 'Fitness',
-    active: true,
-  },
-  {
-    _id: '4',
-    name: 'Hair Styling & Cut',
-    description: 'Professional haircut and styling service with premium products.',
-    price: 7500,
-    duration: 45,
-    category: 'Beauty',
-    active: true,
-  },
-  {
-    _id: '5',
-    name: 'Photography Session',
-    description: 'Professional portrait or event photography session with edited photos included.',
-    price: 25000,
-    duration: 120,
-    category: 'Creative',
-    active: true,
-  },
-  {
-    _id: '6',
-    name: 'Legal Consultation',
-    description: 'Initial consultation with an experienced attorney for legal advice and guidance.',
-    price: 20000,
-    duration: 30,
-    category: 'Legal',
-    active: true,
-  },
-];
-
 const categories = ['All', 'Wellness', 'Consulting', 'Fitness', 'Beauty', 'Creative', 'Legal'];
 
 export default function ServicesPage() {
@@ -83,21 +25,16 @@ export default function ServicesPage() {
         const res = await fetch('/api/services');
         if (res.ok) {
           const data = await res.json();
-          if (data.length > 0) {
-            setServices(data);
-            setFilteredServices(data);
-          } else {
-            setServices(demoServices);
-            setFilteredServices(demoServices);
-          }
+          setServices(data || []);
+          setFilteredServices(data || []);
         } else {
-          setServices(demoServices);
-          setFilteredServices(demoServices);
+          setServices([]);
+          setFilteredServices([]);
         }
       } catch (error) {
-        console.log('Using demo services');
-        setServices(demoServices);
-        setFilteredServices(demoServices);
+        console.error('Error fetching services:', error);
+        setServices([]);
+        setFilteredServices([]);
       } finally {
         setLoading(false);
       }

@@ -11,7 +11,11 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  CheckSquare
+  CheckSquare,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  Trash2
 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Input } from '@/components/ui/input';
@@ -50,22 +54,29 @@ export default function AdminBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('-createdAt');
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState({ total: 0, pages: 1 });
   const [updating, setUpdating] = useState(null);
 
   useEffect(() => {
     fetchBookings();
-  }, [statusFilter]);
+  }, [statusFilter, sortBy, page]);
 
   const fetchBookings = async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.append('status', statusFilter);
+      params.append('sort', sortBy);
+      params.append('page', page.toString());
+      params.append('limit', '10');
       
       const res = await fetch(`/api/bookings?${params}`);
       if (res.ok) {
         const data = await res.json();
         setBookings(data.bookings || []);
+        setPagination(data.pagination || { total: 0, pages: 1 });
       }
     } catch (error) {
       console.log('Error fetching bookings');
@@ -75,7 +86,13 @@ export default function AdminBookingsPage() {
   };
 
   const updateStatus = async (bookingId, newStatus) => {
-    setUpdating(bookingId);
+    const previousBookings = [...bookings];
+    
+    // Optimistic UI Update
+    setBookings((prev) =>
+      prev.map((b) => (b._id === bookingId ? { ...b, status: newStatus } : b))
+    );
+
     try {
       const res = await fetch(`/api/bookings/${bookingId}`, {
         method: 'PATCH',
@@ -83,15 +100,36 @@ export default function AdminBookingsPage() {
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (res.ok) {
-        setBookings((prev) =>
-          prev.map((b) => (b._id === bookingId ? { ...b, status: newStatus } : b))
-        );
+      if (!res.ok) {
+        throw new Error('Failed to update');
       }
     } catch (error) {
-      console.log('Error updating booking');
-    } finally {
-      setUpdating(null);
+      console.error('Error updating booking:', error);
+      // Rollback on error
+      setBookings(previousBookings);
+    }
+  };
+
+  const deleteBooking = async (bookingId) => {
+    if (!window.confirm('Are you sure you want to delete this booking?')) return;
+    
+    const previousBookings = [...bookings];
+    
+    // Optimistic UI Update
+    setBookings((prev) => prev.filter((b) => b._id !== bookingId));
+
+    try {
+      const res = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to delete');
+      }
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      // Rollback on error
+      setBookings(previousBookings);
     }
   };
 
@@ -130,7 +168,20 @@ export default function AdminBookingsPage() {
                 className="pl-10 bg-white border-[#E2E8F0]"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-[180px] bg-white border-[#E2E8F0]">
+                <ArrowUpDown className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="-createdAt">Newest First</SelectItem>
+                <SelectItem value="createdAt">Oldest First</SelectItem>
+                <SelectItem value="-amountPaid">Highest Amount</SelectItem>
+                <SelectItem value="amountPaid">Lowest Amount</SelectItem>
+                <SelectItem value="scheduledAt">Appointment Date</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setPage(1); }}>
               <SelectTrigger className="w-full sm:w-[180px] bg-white border-[#E2E8F0]">
                 <Filter className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filter by status" />
@@ -264,6 +315,13 @@ export default function AdminBookingsPage() {
                                   <XCircle className="mr-2 h-4 w-4" />
                                   Cancel Booking
                                 </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => deleteBooking(booking._id)}
+                                  className="text-red-600 font-medium"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Delete Booking
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </td>
@@ -285,6 +343,38 @@ export default function AdminBookingsPage() {
               </div>
             )}
           </motion.div>
+
+          {/* Pagination */}
+          {pagination.pages > 1 && (
+            <div className="flex items-center justify-between mt-6 bg-white p-4 rounded-xl border border-[#E2E8F0] shadow-sm">
+              <p className="text-sm text-[#6B7280]">
+                Showing page <span className="font-medium text-[#1F2937]">{page}</span> of{' '}
+                <span className="font-medium text-[#1F2937]">{pagination.pages}</span>
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1 || loading}
+                  className="border-[#E2E8F0]"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.min(pagination.pages, p + 1))}
+                  disabled={page === pagination.pages || loading}
+                  className="border-[#E2E8F0]"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

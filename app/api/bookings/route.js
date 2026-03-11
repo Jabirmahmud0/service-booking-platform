@@ -6,12 +6,14 @@ import { auth } from '@/lib/auth';
 // GET - Fetch all bookings (admin only)
 export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const stripeSessionId = searchParams.get('stripeSessionId');
     const session = await auth();
-    if (!session) {
+    
+    // Only require auth if we're not fetching a specific result by stripeSessionId
+    if (!session && !stripeSessionId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-
-    const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const sort = searchParams.get('sort') || '-createdAt';
     const page = parseInt(searchParams.get('page')) || 1;
@@ -22,6 +24,9 @@ export async function GET(request) {
     const query = { deleted: { $ne: true } };
     if (status && status !== 'all') {
       query.status = status;
+    }
+    if (stripeSessionId) {
+      query.stripeSessionId = stripeSessionId;
     }
 
     const totalCount = await Booking.countDocuments(query);

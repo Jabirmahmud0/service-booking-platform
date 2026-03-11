@@ -17,45 +17,50 @@ export async function GET() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const weekAgo = new Date();
+    const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
 
-    // Today's bookings
-    const todayBookings = await Booking.countDocuments({
-      scheduledAt: { $gte: today, $lt: tomorrow },
-      deleted: { $ne: true },
-    });
+    const [stats] = await Booking.aggregate([
+      {
+        $match: { deleted: { $ne: true } }
+      },
+      {
+        $facet: {
+          todayBookings: [
+            { $match: { scheduledAt: { $gte: today, $lt: tomorrow } } },
+            { $count: 'count' }
+          ],
+          weeklyRevenue: [
+            { 
+              $match: { 
+                createdAt: { $gte: weekAgo },
+                status: { $in: ['confirmed', 'completed'] }
+              } 
+            },
+            { $group: { _id: null, total: { $sum: '$amountPaid' } } }
+          ],
+          totalBookings: [
+            { $count: 'count' }
+          ],
+          pendingBookings: [
+            { $match: { status: 'pending' } },
+            { $count: 'count' }
+          ]
+        }
+      },
+      {
+        $project: {
+          todayBookings: { $ifNull: [{ $arrayElemAt: ['$todayBookings.count', 0] }, 0] },
+          weeklyRevenue: { $ifNull: [{ $arrayElemAt: ['$weeklyRevenue.total', 0] }, 0] },
+          totalBookings: { $ifNull: [{ $arrayElemAt: ['$totalBookings.count', 0] }, 0] },
+          pendingBookings: { $ifNull: [{ $arrayElemAt: ['$pendingBookings.count', 0] }, 0] }
+        }
+      }
+    ]);
 
-    // Weekly revenue (confirmed + completed bookings)
-    const weeklyBookings = await Booking.find({
-      createdAt: { $gte: weekAgo },
-      status: { $in: ['confirmed', 'completed'] },
-      deleted: { $ne: true },
-    });
-    const weeklyRevenue = weeklyBookings.reduce((sum, b) => sum + b.amountPaid, 0);
-
-    // Total bookings
-    const totalBookings = await Booking.countDocuments({
-      deleted: { $ne: true },
-    });
-
-    // Pending bookings
-    const pendingBookings = await Booking.countDocuments({
-      status: 'pending',
-      deleted: { $ne: true },
-    });
-
-    return NextResponse.json({
-      todayBookings,
-      weeklyRevenue,
-      totalBookings,
-      pendingBookings,
-    });
+    return NextResponse.json(stats);
   } catch (error) {
     console.error('Error fetching stats:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch stats' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to fetch stats' }, { status: 500 });
   }
 }

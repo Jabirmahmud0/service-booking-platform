@@ -16,13 +16,29 @@ function SuccessContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (sessionId) {
-      // In production, fetch booking details using session_id
-      // For demo, we'll show a generic success state
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
+    const fetchBooking = async () => {
+      if (!sessionId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // We'll use the existing bookings API but with a session filter
+        const res = await fetch(`/api/bookings?stripeSessionId=${sessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.bookings && data.bookings.length > 0) {
+            setBooking(data.bookings[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching booking success info:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooking();
   }, [sessionId]);
 
   const confettiColors = ['#2563EB', '#1E3A5F', '#16A34A', '#DBEAFE'];
@@ -109,7 +125,6 @@ function SuccessContent() {
                 Thank you for your booking. A confirmation email has been sent to your inbox.
               </motion.p>
 
-              {/* Booking Reference */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -118,7 +133,7 @@ function SuccessContent() {
               >
                 <p className="text-sm text-[#6B7280] mb-2">Booking Reference</p>
                 <p className="text-2xl font-bold font-mono text-[#1E3A5F]">
-                  #BK-{sessionId ? sessionId.slice(-6).toUpperCase() : 'DEMO01'}
+                  #{booking?.bookingRef || (sessionId ? sessionId.slice(-8).toUpperCase() : 'DEMO01')}
                 </p>
               </motion.div>
 

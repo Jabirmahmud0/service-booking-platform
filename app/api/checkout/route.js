@@ -15,6 +15,22 @@ export async function POST(request) {
       customerEmail,
       customerPhone,
     } = body;
+    
+    // Connect to database early to fail fast if auth/connection is broken
+    try {
+      await connectDB();
+      console.log('Database connected successfully');
+    } catch (dbError) {
+      console.error('CRITICAL: Database connection failed:', dbError.message);
+      return NextResponse.json(
+        { 
+          error: 'Database connection failed', 
+          details: dbError.message,
+          hint: 'Check your MONGODB_URI in .env.local. Ensure the password and database name are correct.'
+        },
+        { status: 503 }
+      );
+    }
 
     // Validate required fields
     if (!serviceId || !serviceName || !servicePrice || !scheduledAt || !customerName || !customerEmail || !customerPhone) {
@@ -54,10 +70,8 @@ export async function POST(request) {
       },
     });
 
-    // Connect to database and create pending booking
+    // Create pending booking
     try {
-      await connectDB();
-      
       await Booking.create({
         serviceId,
         customerName,
@@ -69,9 +83,11 @@ export async function POST(request) {
         amountPaid: servicePrice,
         currency: 'usd',
       });
+      console.log('Pending booking created:', session.id);
     } catch (dbError) {
-      console.error('Database error:', dbError);
-      // Continue even if DB fails - webhook will handle it
+      console.error('Error creating pending booking:', dbError.message);
+      // We don't fail here because the session is already created, 
+      // but we log it for the webhook fallback.
     }
 
     return NextResponse.json({ url: session.url });

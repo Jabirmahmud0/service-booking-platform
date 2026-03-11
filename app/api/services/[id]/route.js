@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Service from '@/models/Service';
 import { auth } from '@/lib/auth';
@@ -7,6 +8,15 @@ import { auth } from '@/lib/auth';
 export async function GET(request, { params }) {
   try {
     const { id } = await params;
+
+    // Validate ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json(
+        { error: 'Invalid Service ID' },
+        { status: 404 }
+      );
+    }
+
     await connectDB();
     
     const service = await Service.findById(id);
@@ -75,11 +85,7 @@ export async function DELETE(request, { params }) {
     const { id } = await params;
     await connectDB();
 
-    const service = await Service.findByIdAndUpdate(
-      id,
-      { active: false },
-      { new: true }
-    );
+    const service = await Service.findByIdAndDelete(id);
 
     if (!service) {
       return NextResponse.json(
