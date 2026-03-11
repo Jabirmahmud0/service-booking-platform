@@ -20,9 +20,11 @@ export async function GET() {
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
 
+    const nonDeletedFilter = { $or: [{ deleted: false }, { deleted: { $exists: false } }] };
+
     const [stats] = await Booking.aggregate([
       {
-        $match: { deleted: { $ne: true } }
+        $match: nonDeletedFilter
       },
       {
         $facet: {
@@ -31,11 +33,11 @@ export async function GET() {
             { $count: 'count' }
           ],
           weeklyRevenue: [
-            { 
-              $match: { 
+            {
+              $match: {
                 createdAt: { $gte: weekAgo },
                 status: { $in: ['confirmed', 'completed'] }
-              } 
+              }
             },
             { $group: { _id: null, total: { $sum: '$amountPaid' } } }
           ],

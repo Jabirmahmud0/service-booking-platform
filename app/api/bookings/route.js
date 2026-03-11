@@ -21,7 +21,7 @@ export async function GET(request) {
 
     await connectDB();
 
-    const query = { deleted: { $ne: true } };
+    const query = { $or: [{ deleted: false }, { deleted: { $exists: false } }] };
     if (status && status !== 'all') {
       query.status = status;
     }
