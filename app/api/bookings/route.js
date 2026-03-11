@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Booking from '@/models/Booking';
+import Service from '@/models/Service';
 import { auth } from '@/lib/auth';
 
 // GET - Fetch all bookings (admin only)
