@@ -6,6 +6,9 @@ import mongoose from 'mongoose';
 import Booking from '@/models/Booking';
 import { sendConfirmationEmail } from '@/lib/email';
 
+// Disable Next.js body parser to read raw body for Stripe signature verification
+export const runtime = 'nodejs';
+
 export async function POST(request) {
   const body = await request.text();
   const headersList = await headers();
